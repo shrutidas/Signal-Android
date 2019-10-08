@@ -70,11 +70,15 @@ public class IdentityUtil {
     long                 time          = System.currentTimeMillis();
     SmsDatabase          smsDatabase   = DatabaseFactory.getSmsDatabase(context);
     GroupDatabase        groupDatabase = DatabaseFactory.getGroupDatabase(context);
+    Log.i(TAG, "before crash");
     GroupDatabase.Reader reader        = groupDatabase.getGroups();
+    Log.i(TAG, "after crash");
 
     GroupDatabase.GroupRecord groupRecord;
 
+    // this loop deals with groups the the recipient is in... I think
     while ((groupRecord = reader.getNext()) != null) {
+
       if (groupRecord.getMembers().contains(recipient.getId()) && groupRecord.isActive() && !groupRecord.isMms()) {
         SignalServiceGroup group = new SignalServiceGroup(groupRecord.getId());
 
@@ -99,11 +103,14 @@ public class IdentityUtil {
       }
     }
 
+    //this deals with the single person chat.
     if (remote) {
       IncomingTextMessage incoming = new IncomingTextMessage(recipient.getId(), 1, time, null, Optional.absent(), 0, false);
 
       if (verified) incoming = new IncomingIdentityVerifiedMessage(incoming);
       else          incoming = new IncomingIdentityDefaultMessage(incoming);
+
+      Log.i(TAG, "Inserting verified outbox, is remote...");
 
       smsDatabase.insertMessageInbox(incoming);
     } else {

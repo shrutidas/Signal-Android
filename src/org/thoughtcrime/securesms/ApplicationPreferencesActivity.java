@@ -47,6 +47,8 @@ import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
+import org.thoughtcrime.securesms.education.LongEducationalMessageActivity;
+
 
 /**
  * The Activity for application preference display and management.
@@ -69,6 +71,7 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
   private static final String PREFERENCE_CATEGORY_CHATS          = "preference_category_chats";
   private static final String PREFERENCE_CATEGORY_DEVICES        = "preference_category_devices";
   private static final String PREFERENCE_CATEGORY_ADVANCED       = "preference_category_advanced";
+  private static final String PREFERENCE_CATEGORY_MORE_E2EE      = "preference_category_more_e2ee";
 
   private final DynamicTheme    dynamicTheme    = new DynamicTheme();
   private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
@@ -155,6 +158,8 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
         .setOnPreferenceClickListener(new CategoryClickListener(PREFERENCE_CATEGORY_DEVICES));
       this.findPreference(PREFERENCE_CATEGORY_ADVANCED)
         .setOnPreferenceClickListener(new CategoryClickListener(PREFERENCE_CATEGORY_ADVANCED));
+      this.findPreference(PREFERENCE_CATEGORY_MORE_E2EE)
+        .setOnPreferenceClickListener( new CategoryClickListener(PREFERENCE_CATEGORY_MORE_E2EE));
 
       if (VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
         tintIcons(getActivity());
@@ -227,6 +232,8 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
       this.findPreference(PREFERENCE_CATEGORY_CHATS).setIcon(chats);
       this.findPreference(PREFERENCE_CATEGORY_DEVICES).setIcon(devices);
       this.findPreference(PREFERENCE_CATEGORY_ADVANCED).setIcon(advanced);
+
+      this.findPreference(PREFERENCE_CATEGORY_MORE_E2EE).setIcon(privacy);
     }
 
     private class CategoryClickListener implements Preference.OnPreferenceClickListener {
@@ -262,6 +269,10 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
           break;
         case PREFERENCE_CATEGORY_ADVANCED:
           fragment = new AdvancedPreferenceFragment();
+          break;
+        case PREFERENCE_CATEGORY_MORE_E2EE:
+          Intent longMessageIntent = new Intent(getActivity(), LongEducationalMessageActivity.class);
+          startActivity(longMessageIntent);
           break;
         default:
           throw new AssertionError();

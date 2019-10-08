@@ -222,6 +222,10 @@ public class InputPanel extends LinearLayout
     return mediaKeyboard;
   }
 
+  public View getComposeText() {
+    return composeText;
+  }
+
   @Override
   public void onRecordPermissionRequired() {
     if (listener != null) listener.onRecorderPermissionRequired();

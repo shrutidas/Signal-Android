@@ -195,6 +195,58 @@ public class TextSecurePreferences {
 
   private static final String HAS_SEEN_SWIPE_TO_REPLY = "pref_has_seen_swipe_to_reply";
 
+  private static final String NUM_ACTIVITY_LAUNCHES = "number_of_signal_launches";
+
+  private static final String EDUCATIONAL_MESSAGE_SHOW_STATUS = "educational_message_show_status";
+
+  private static final String NUM_SHORT_MESSAGE_SHOWN = "number_of_times_short_message_was_shown";
+
+
+  public static int incrementLastMessageSeen( @NonNull Context context){
+    //might want to check for overflows.
+
+    int timesOpened = getIntegerPreference(context, NUM_SHORT_MESSAGE_SHOWN, 0);
+    Log.d("number of messages shown: ", "" + timesOpened);
+    setIntegerPrefrence(context, NUM_SHORT_MESSAGE_SHOWN, timesOpened + 1);
+
+    return timesOpened + 1;
+
+  }
+
+
+  public static void incrementAppOpenTime( @NonNull Context context){
+    int timesOpened = getIntegerPreference(context, NUM_ACTIVITY_LAUNCHES, 0);
+    Log.d("number of signal opens: ", "" + timesOpened);
+    setIntegerPrefrence(context, NUM_ACTIVITY_LAUNCHES, timesOpened + 1);
+
+  }
+
+  public static boolean isEducationArmed( @NonNull Context context){
+
+    return getBooleanPreference(context, EDUCATIONAL_MESSAGE_SHOW_STATUS, false);
+  }
+
+  public static void armEducation( @NonNull Context context){
+    setBooleanPreference(context, EDUCATIONAL_MESSAGE_SHOW_STATUS, true);
+
+
+  }
+
+  public static void unarmEducation( @NonNull Context context){
+
+    setBooleanPreference(context, EDUCATIONAL_MESSAGE_SHOW_STATUS, false);
+
+  }
+
+
+
+  public static boolean hasNotSeenEducationalMessageInAWhile( @NonNull Context context){
+    if(getIntegerPreference(context, NUM_ACTIVITY_LAUNCHES, 0) % 2 == 0)
+      return true;
+    return false;
+  }
+
+
   public static boolean isScreenLockEnabled(@NonNull Context context) {
     return getBooleanPreference(context, SCREEN_LOCK, false);
   }

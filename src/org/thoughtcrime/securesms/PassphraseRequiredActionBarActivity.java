@@ -9,6 +9,8 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import org.thoughtcrime.securesms.backup.BackupProtos;
 import org.thoughtcrime.securesms.logging.Log;
 
 import org.thoughtcrime.securesms.crypto.MasterSecretUtil;
@@ -19,9 +21,19 @@ import org.thoughtcrime.securesms.push.SignalServiceNetworkAccess;
 import org.thoughtcrime.securesms.registration.WelcomeActivity;
 import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
+import org.thoughtcrime.securesms.education.*;
 
 import java.util.Locale;
 
+/* this is the class that handles the control flow of the program.
+ it decides if the app will go into passphrase creating mode or if the welcome screen will be
+ shown.
+
+
+ From what I can tell the passphrase thing was something they used to do but now it is automated and user input
+ is no longer needed. This is true for at least new android versions.
+
+ */
 public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarActivity implements MasterSecretListener {
   private static final String TAG = PassphraseRequiredActionBarActivity.class.getSimpleName();
 
@@ -34,6 +46,7 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   private static final int STATE_PROMPT_PUSH_REGISTRATION = 4;
   private static final int STATE_EXPERIENCE_UPGRADE       = 5;
   private static final int STATE_WELCOME_SCREEN           = 6;
+  private static final int STATE_EDUCATIONAL_MESSAGE      = 7; // used to show educational message
 
   private SignalServiceNetworkAccess networkAccess;
   private BroadcastReceiver          clearKeyReceiver;
@@ -45,6 +58,7 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
 
     final boolean locked = KeyCachingService.isLocked(this);
     routeApplicationState(locked);
+
 
     super.onCreate(savedInstanceState);
 
@@ -61,6 +75,11 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
   protected void onResume() {
     Log.i(TAG, "onResume()");
     super.onResume();
+
+    // these two lines were copied from onCreate.
+    final boolean locked = KeyCachingService.isLocked(this);
+    routeApplicationState(locked);
+
 
     if (networkAccess.isCensored(this)) {
       ApplicationContext.getInstance(this).getJobManager().add(new PushNotificationReceiveJob(this));
@@ -137,6 +156,7 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
     case STATE_WELCOME_SCREEN:           return getWelcomeIntent();
     case STATE_PROMPT_PUSH_REGISTRATION: return getPushRegistrationIntent();
     case STATE_EXPERIENCE_UPGRADE:       return getExperienceUpgradeIntent();
+    case STATE_EDUCATIONAL_MESSAGE:      return getEducationalMessageIntent();
     default:                             return null;
     }
   }
@@ -150,6 +170,9 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
       return STATE_UI_BLOCKING_UPGRADE;
     } else if (!TextSecurePreferences.hasSeenWelcomeScreen(this)) {
       return STATE_WELCOME_SCREEN;
+    } else if (EducationalMessageManager.isTimeForShortMessage( this) && TextSecurePreferences.isEducationArmed(this)){
+      //must make sure this only happens when the user opens the app.
+      return STATE_EDUCATIONAL_MESSAGE;
     } else if (!TextSecurePreferences.hasPromptedPushRegistration(this)) {
       return STATE_PROMPT_PUSH_REGISTRATION;
     } else if (ExperienceUpgradeActivity.isUpdate(this)) {
@@ -198,6 +221,10 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
 
   private Intent getConversationListIntent() {
     return new Intent(this, ConversationListActivity.class);
+  }
+
+  private Intent getEducationalMessageIntent() {
+    return getRoutedIntent(EducationActivity.class, getConversationListIntent());
   }
 
   private void initializeClearKeyReceiver() {

@@ -148,6 +148,7 @@ import org.thoughtcrime.securesms.database.model.StickerRecord;
 import org.thoughtcrime.securesms.events.ReminderUpdateEvent;
 import org.thoughtcrime.securesms.giph.ui.GiphyActivity;
 import org.thoughtcrime.securesms.jobs.MultiDeviceBlockedUpdateJob;
+import org.thoughtcrime.securesms.jobs.MultiDeviceVerifiedUpdateJob;
 import org.thoughtcrime.securesms.jobs.RetrieveProfileJob;
 import org.thoughtcrime.securesms.jobs.ServiceOutageDetectionJob;
 import org.thoughtcrime.securesms.linkpreview.LinkPreview;
@@ -191,8 +192,11 @@ import org.thoughtcrime.securesms.recipients.RecipientId;
 import org.thoughtcrime.securesms.search.model.MessageResult;
 import org.thoughtcrime.securesms.service.KeyCachingService;
 import org.thoughtcrime.securesms.sms.MessageSender;
+import org.thoughtcrime.securesms.sms.OutgoingEducationalMessage;
 import org.thoughtcrime.securesms.sms.OutgoingEncryptedMessage;
 import org.thoughtcrime.securesms.sms.OutgoingEndSessionMessage;
+import org.thoughtcrime.securesms.sms.OutgoingIdentityDefaultMessage;
+import org.thoughtcrime.securesms.sms.OutgoingIdentityVerifiedMessage;
 import org.thoughtcrime.securesms.sms.OutgoingTextMessage;
 import org.thoughtcrime.securesms.stickers.StickerKeyboardProvider;
 import org.thoughtcrime.securesms.stickers.StickerLocator;
@@ -214,6 +218,7 @@ import org.thoughtcrime.securesms.util.ServiceUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.util.TextSecurePreferences.MediaKeyboardMode;
 import org.thoughtcrime.securesms.util.Util;
+import org.thoughtcrime.securesms.util.EducationalUtil;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.thoughtcrime.securesms.util.concurrent.AssertedSuccessListener;
 import org.thoughtcrime.securesms.util.concurrent.ListenableFuture;
@@ -365,6 +370,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
     initializeLinkPreviewObserver();
     initializeSearchObserver();
     initializeStickerObserver();
+
     initializeSecurity(false, isDefaultSms).addListener(new AssertedSuccessListener<Boolean>() {
       @Override
       public void onSuccess(Boolean result) {
@@ -391,6 +397,55 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
         });
       }
     });
+
+
+
+    /* messing around with code
+    vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+     */
+
+
+    // these need to be done in their own thread and not the main thread.
+
+
+
+
+
+
+    //OutgoingExpirationUpdateMessage outgoingMessage = new OutgoingExpirationUpdateMessage(getRecipient(), System.currentTimeMillis(), 10 * 1000L);
+    //MessageSender.send(ConversationActivity.this, outgoingMessage, threadId, false, null);
+
+    //IdentityUtil.markIdentityVerified(this, recipient.get(),true, false);
+
+
+    Context c = this;
+
+
+    new AsyncTask<Recipient, Void, Void>() {
+      @Override
+      protected Void doInBackground(Recipient... params) {
+        synchronized (SESSION_LOCK) {
+
+          EducationalUtil.sendEducationalMessage( c, recipient.get(), true, false);
+
+        }
+        return null;
+      }
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, recipient.get());
+
+
+
+
+
+    /* messing around with code
+    ------------------------------------------------
+     */
+
+
+
+
+
+
   }
 
   @Override

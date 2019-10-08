@@ -20,6 +20,7 @@ import org.thoughtcrime.securesms.crypto.IdentityKeyParcelable;
 import org.thoughtcrime.securesms.database.IdentityDatabase;
 import org.thoughtcrime.securesms.database.IdentityDatabase.IdentityRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
+import org.thoughtcrime.securesms.education.EducationalMessageManager;
 import org.thoughtcrime.securesms.logging.Log;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.recipients.LiveRecipient;
@@ -126,12 +127,16 @@ public class ConversationUpdateItem extends LinearLayout
     else if (messageRecord.isExpirationTimerUpdate()) setTimerRecord(messageRecord);
     else if (messageRecord.isEndSession())            setEndSessionRecord(messageRecord);
     else if (messageRecord.isIdentityUpdate())        setIdentityRecord(messageRecord);
+    else if (messageRecord.isEducationalMessage())    setEducationalRecord(messageRecord);
     else if (messageRecord.isIdentityVerified() ||
-             messageRecord.isIdentityDefault())       setIdentityVerifyUpdate(messageRecord);
+             messageRecord.isIdentityDefault())       setIdentityVerifyUpdate(messageRecord); //this does block the view from showing if commented out.
     else                                              throw new AssertionError("Neither group nor log nor joined.");
 
     if (batchSelected.contains(messageRecord)) setSelected(true);
     else                                       setSelected(false);
+
+    Log.d("conversation update item", "is called!!!!!!!!!!!");
+
   }
 
   private void setCallRecord(MessageRecord messageRecord) {
@@ -179,7 +184,7 @@ public class ConversationUpdateItem extends LinearLayout
     else                                    icon.setImageResource(R.drawable.ic_info_outline_white_24dp);
 
     icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
-    body.setText(messageRecord.getDisplayBody(getContext()));
+    body.setText( messageRecord.getDisplayBody(getContext()));
 
     title.setVisibility(GONE);
     body.setVisibility(VISIBLE);
@@ -215,6 +220,21 @@ public class ConversationUpdateItem extends LinearLayout
     title.setVisibility(GONE);
     body.setVisibility(VISIBLE);
     date.setVisibility(GONE);
+  }
+
+  // Omer added this. Handles the educational messages
+  private void setEducationalRecord(MessageRecord messageRecord){
+
+    icon.setImageResource(R.drawable.ic_check_white_24dp);
+
+    icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
+    body.setText(EducationalMessageManager.getShortMessage(getContext()));//messageRecord.getDisplayBody(getContext()));
+
+    title.setVisibility(GONE);
+    body.setVisibility(VISIBLE);
+    date.setVisibility(GONE);
+
+
   }
   
   @Override

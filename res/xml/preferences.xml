@@ -29,8 +29,14 @@
                 android:title="@string/preferences__linked_devices"
                 android:icon="@drawable/ic_laptop_24dp"/>
 
+    <Preference android:key="preference_category_more_e2ee"
+                android:title="@string/more_about_e2ee"
+                android:icon="@drawable/ic_security_24dp"/>
+
     <Preference android:key="preference_category_advanced"
                 android:title="@string/preferences__advanced"
                 android:icon="@drawable/ic_advanced_24dp"/>
+
+
 
 </PreferenceScreen>

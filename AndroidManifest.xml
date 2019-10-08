@@ -324,6 +324,18 @@
               android:windowSoftInputMode="stateUnchanged"
               android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
 
+    <activity android:name=".education.EducationActivity"
+        android:launchMode="singleTask"
+        android:theme="@style/TextSecure.LightRegistrationTheme"
+        android:windowSoftInputMode="stateUnchanged"
+        android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
+    <activity android:name=".education.LongEducationalMessageActivity"
+        android:launchMode="singleTask"
+        android:theme="@style/TextSecure.LightRegistrationTheme"
+        android:windowSoftInputMode="stateUnchanged"
+        android:configChanges="touchscreen|keyboard|keyboardHidden|orientation|screenLayout|screenSize"/>
+
     <activity android:name=".RegistrationActivity"
               android:launchMode="singleTask"
               android:theme="@style/TextSecure.LightRegistrationTheme"

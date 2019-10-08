@@ -143,6 +143,8 @@ public class ApplicationContext extends MultiDexApplication implements DefaultLi
   public void onStart(@NonNull LifecycleOwner owner) {
     isAppVisible = true;
     Log.i(TAG, "App is now visible.");
+    TextSecurePreferences.incrementAppOpenTime(this);
+
     executePendingContactSync();
     KeyCachingService.onAppForegrounded(this);
   }
@@ -153,6 +155,9 @@ public class ApplicationContext extends MultiDexApplication implements DefaultLi
     Log.i(TAG, "App is no longer visible.");
     KeyCachingService.onAppBackgrounded(this);
     MessageNotifier.setVisibleThread(-1);
+    if( TextSecurePreferences.hasNotSeenEducationalMessageInAWhile(this) && !TextSecurePreferences.isEducationArmed(this) ){
+      TextSecurePreferences.armEducation(this);
+    }
   }
 
   public JobManager getJobManager() {

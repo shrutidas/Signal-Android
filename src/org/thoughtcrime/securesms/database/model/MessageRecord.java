@@ -103,6 +103,8 @@ public abstract class MessageRecord extends DisplayRecord {
       return new SpannableString(context.getString(R.string.MessageRecord_you_called));
     } else if (isMissedCall()) {
       return new SpannableString(context.getString(R.string.MessageRecord_missed_call));
+    } else if (isEducationalMessage()){
+      return new SpannableString(context.getString(R.string.short_v1));
     } else if (isJoined()) {
       return new SpannableString(context.getString(R.string.MessageRecord_s_joined_signal, getIndividualRecipient().toShortString()));
     } else if (isExpirationTimerUpdate()) {
@@ -166,6 +168,10 @@ public abstract class MessageRecord extends DisplayRecord {
     return SmsDatabase.Types.isContentBundleKeyExchange(type);
   }
 
+  public boolean isEducationalMessage() {
+    return SmsDatabase.Types.isEducationalMessage(type);
+  }
+
   public boolean isIdentityUpdate() {
     return SmsDatabase.Types.isIdentityUpdate(type);
   }
@@ -180,7 +186,8 @@ public abstract class MessageRecord extends DisplayRecord {
 
   public boolean isUpdate() {
     return isGroupAction() || isJoined() || isExpirationTimerUpdate() || isCallLog() ||
-           isEndSession()  || isIdentityUpdate() || isIdentityVerified() || isIdentityDefault();
+           isEndSession()  || isIdentityUpdate() || isIdentityVerified() || isIdentityDefault() ||
+            isEducationalMessage();
   }
 
   public boolean isMediaPending() {

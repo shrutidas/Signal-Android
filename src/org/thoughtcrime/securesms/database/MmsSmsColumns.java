@@ -84,6 +84,10 @@ public interface MmsSmsColumns {
     protected static final long ENCRYPTION_REMOTE_DUPLICATE_BIT  = 0x04000000;
     protected static final long ENCRYPTION_REMOTE_LEGACY_BIT     = 0x02000000;
 
+    // Message is an educational message.
+    // doesn't really fit but uses the encryption mask.
+    protected static final long EDUCATIONAL_MESSAGE_BIT          = 0x01000000;
+
     public static boolean isDraftMessageType(long type) {
       return (type & BASE_TYPE_MASK) == BASE_DRAFT_TYPE;
     }
@@ -174,6 +178,11 @@ public interface MmsSmsColumns {
 
     public static boolean isIdentityDefault(long type) {
       return (type & KEY_EXCHANGE_IDENTITY_DEFAULT_BIT) != 0;
+    }
+
+    public static boolean isEducationalMessage(long type){
+
+      return (type & ENCRYPTION_MASK) == EDUCATIONAL_MESSAGE_BIT;
     }
 
     public static boolean isCorruptedKeyExchange(long type) {

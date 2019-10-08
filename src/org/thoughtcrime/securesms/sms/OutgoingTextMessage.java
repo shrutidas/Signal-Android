@@ -68,6 +68,10 @@ public class OutgoingTextMessage {
     return false;
   }
 
+  public boolean isEducationalMessage() {
+    return false;
+  }
+
   public static OutgoingTextMessage from(SmsMessageRecord record) {
     if (record.isSecure()) {
       return new OutgoingEncryptedMessage(record.getRecipient(), record.getBody(), record.getExpiresIn());

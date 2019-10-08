@@ -26,21 +26,25 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.TooltipCompat;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import org.greenrobot.eventbus.EventBus;
 import org.thoughtcrime.securesms.color.MaterialColor;
 import org.thoughtcrime.securesms.components.RatingManager;
 import org.thoughtcrime.securesms.components.SearchToolbar;
+import org.thoughtcrime.securesms.components.TooltipPopup;
 import org.thoughtcrime.securesms.contacts.avatars.ContactColors;
 import org.thoughtcrime.securesms.contacts.avatars.GeneratedContactPhoto;
 import org.thoughtcrime.securesms.contacts.avatars.ProfileContactPhoto;
@@ -55,14 +59,19 @@ import org.thoughtcrime.securesms.permissions.Permissions;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.search.SearchFragment;
 import org.thoughtcrime.securesms.service.KeyCachingService;
+import org.thoughtcrime.securesms.stickers.StickerPackInstallEvent;
 import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicNoActionBarTheme;
 import org.thoughtcrime.securesms.util.DynamicTheme;
+import org.thoughtcrime.securesms.util.EducationalUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 import org.thoughtcrime.securesms.util.concurrent.SimpleTask;
+import org.thoughtcrime.securesms.education.*;
 import org.whispersystems.libsignal.util.guava.Optional;
 
 import java.util.List;
+
+import static org.whispersystems.libsignal.SessionCipher.SESSION_LOCK;
 
 public class ConversationListActivity extends PassphraseRequiredActionBarActivity
     implements ConversationListFragment.ConversationSelectedListener
@@ -103,6 +112,44 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     RegistrationLockDialog.showReminderIfNecessary(this);
 
     TooltipCompat.setTooltipText(searchAction, getText(R.string.SearchToolbar_search_for_conversations_contacts_and_messages));
+
+
+
+    Context c = this;
+
+    if(EducationalMessageManager.isTimeForShortMessage(c)){
+
+      new AsyncTask<Recipient, Void, Void>() {
+        @Override
+        protected Void doInBackground(Recipient... params) {
+          synchronized (SESSION_LOCK) {
+
+            TooltipPopup.forTarget(fragmentContainer)
+                    .setBackgroundTint(getResources().getColor(R.color.core_blue))
+                    .setTextColor(getResources().getColor(R.color.core_white))
+                    .setText(EducationalMessageManager.getShortMessageID(c))
+                    .show(TooltipPopup.POSITION_BELOW)
+                    .getContentView().setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ConversationListActivity.this);
+                builder.setIconAttribute(R.attr.dialog_alert_icon);
+                builder.setTitle("More about ");
+
+                builder.show();
+              }
+            });
+
+
+          }
+          return null;
+        }
+      }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+    }
+
+
+
   }
 
   @Override

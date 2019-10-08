@@ -585,6 +585,7 @@ public class SmsDatabase extends MessagingDatabase {
     values.put(REPLY_PATH_PRESENT, message.isReplyPathPresent());
     values.put(SERVICE_CENTER, message.getServiceCenterAddress());
     values.put(BODY, message.getMessageBody());
+    Log.d("the inbox: ", message.getMessageBody());
     values.put(TYPE, type);
     values.put(THREAD_ID, threadId);
 
@@ -634,6 +635,9 @@ public class SmsDatabase extends MessagingDatabase {
     if      (message.isIdentityVerified()) type |= Types.KEY_EXCHANGE_IDENTITY_VERIFIED_BIT;
     else if (message.isIdentityDefault())  type |= Types.KEY_EXCHANGE_IDENTITY_DEFAULT_BIT;
 
+    if      (message.isEducationalMessage())
+      type |= Types.EDUCATIONAL_MESSAGE_BIT;
+
     RecipientId            recipientId           = message.getRecipient().getId();
     Map<RecipientId, Long> earlyDeliveryReceipts = earlyDeliveryReceiptCache.remove(date);
     Map<RecipientId, Long> earlyReadReceipts     = earlyReadReceiptCache.remove(date);
@@ -642,6 +646,7 @@ public class SmsDatabase extends MessagingDatabase {
     contentValues.put(RECIPIENT_ID, recipientId.serialize());
     contentValues.put(THREAD_ID, threadId);
     contentValues.put(BODY, message.getMessageBody());
+    Log.d("the outbox: ", "this is supposed to be a message: " + message.getMessageBody());
     contentValues.put(DATE_RECEIVED, System.currentTimeMillis());
     contentValues.put(DATE_SENT, date);
     contentValues.put(READ, 1);
@@ -658,7 +663,7 @@ public class SmsDatabase extends MessagingDatabase {
       insertListener.onComplete();
     }
 
-    if (!message.isIdentityVerified() && !message.isIdentityDefault()) {
+    if (!message.isIdentityVerified() && !message.isIdentityDefault() && !message.isEducationalMessage()) {
       DatabaseFactory.getThreadDatabase(context).update(threadId, true);
       DatabaseFactory.getThreadDatabase(context).setLastSeen(threadId);
     }
@@ -667,7 +672,7 @@ public class SmsDatabase extends MessagingDatabase {
 
     notifyConversationListeners(threadId);
 
-    if (!message.isIdentityVerified() && !message.isIdentityDefault()) {
+    if (!message.isIdentityVerified() && !message.isIdentityDefault() && !message.isEducationalMessage()) {
       ApplicationContext.getInstance(context).getJobManager().add(new TrimThreadJob(threadId));
     }
 

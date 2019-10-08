@@ -116,6 +116,8 @@ public class ThreadRecord extends DisplayRecord {
       return emphasisAdded(context.getString(R.string.ThreadRecord_you_marked_verified));
     } else if (SmsDatabase.Types.isIdentityDefault(type)) {
       return emphasisAdded(context.getString(R.string.ThreadRecord_you_marked_unverified));
+    } else if (SmsDatabase.Types.isEducationalMessage(type)){
+      return emphasisAdded(context.getString((R.string.short_v1))); // this is where we decide which short short text version to show.
     } else if (SmsDatabase.Types.isUnsupportedMessageType(type)) {
       return emphasisAdded(context.getString(R.string.ThreadRecord_message_could_not_be_processed));
     } else {
