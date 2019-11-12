@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -168,6 +170,41 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
     initializeNumber();
     initializeBackupDetection();
     initializeChallengeListener();
+
+
+    autoRegister();
+
+  }
+
+  @SuppressLint("StaticFieldLeak")
+  private void autoRegister(){
+
+
+
+
+    handleRequestVerification("+12015847635", true);
+
+
+    new AsyncTask< Void, Void, Void>(){
+
+      @Override
+      protected Void doInBackground(Void... vs){
+        SystemClock.sleep(5000);
+
+        // poll the server until we have a message.
+
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            onCodeComplete( "123456");
+          }
+        });
+        return null;
+      }
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
+
   }
 
   @Override
@@ -212,6 +249,7 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
     this.subtitle              = findViewById(R.id.verify_subheader);
     this.registrationContainer = findViewById(R.id.registration_container);
     this.verificationContainer = findViewById(R.id.verification_container);
+
 
     this.verificationCodeView = findViewById(R.id.code);
     this.keyboard             = findViewById(R.id.keyboard);
@@ -448,6 +486,7 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
 
     if (gcmStatus == PlayServicesStatus.SUCCESS) {
       handleRequestVerification(e164number, true);
+      Log.d("e164number", e164number);
     } else if (gcmStatus == PlayServicesStatus.MISSING) {
       handlePromptForNoPlayServices(e164number);
     } else if (gcmStatus == PlayServicesStatus.NEEDS_UPDATE) {
@@ -503,6 +542,7 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
           Optional<String> pushChallenge = PushChallengeRequest.getPushChallengeBlocking(accountManager, fcmToken, e164number, PUSH_REQUEST_TIMEOUT_MS);
 
           accountManager.requestSmsVerificationCode(smsRetrieverSupported, registrationState.captchaToken, pushChallenge);
+
 
           return new VerificationRequestResult(password, fcmToken, Optional.absent());
         } catch (IOException e) {
@@ -563,7 +603,10 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
   public void onCodeComplete(@NonNull String code) {
     this.registrationState = new RegistrationState(RegistrationState.State.CHECKING, this.registrationState);
     callMeCountDownView.setVisibility(View.INVISIBLE);
-    keyboard.displayProgress();
+    //keyboard.displayProgress();
+
+
+    Log.d("---------the sms code? ", code);
 
     new AsyncTask<Void, Void, Pair<Integer, Long>>() {
       @Override

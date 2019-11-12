@@ -50,6 +50,8 @@ import org.thoughtcrime.securesms.database.model.MediaMmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.database.model.NotificationMmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.Quote;
+import org.thoughtcrime.securesms.education.EducationalMessage;
+import org.thoughtcrime.securesms.education.EducationalMessageManager;
 import org.thoughtcrime.securesms.jobs.TrimThreadJob;
 import org.thoughtcrime.securesms.linkpreview.LinkPreview;
 import org.thoughtcrime.securesms.logging.Log;
@@ -73,7 +75,9 @@ import org.whispersystems.libsignal.util.guava.Optional;
 import java.io.Closeable;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -82,6 +86,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.thoughtcrime.securesms.contactshare.Contact.Avatar;
+import static org.webrtc.ContextUtils.getApplicationContext;
 
 public class MmsDatabase extends MessagingDatabase {
 
@@ -978,6 +983,10 @@ public class MmsDatabase extends MessagingDatabase {
 
     Map<RecipientId, Long> earlyDeliveryReceipts = earlyDeliveryReceiptCache.remove(message.getSentTimeMillis());
     Map<RecipientId, Long> earlyReadReceipts     = earlyReadReceiptCache.remove(message.getSentTimeMillis());
+
+    Calendar time = GregorianCalendar.getInstance();
+    EducationalMessageManager.notifyStatServer(getApplicationContext(), EducationalMessageManager.MESSAGE_EXCHANGE,
+            EducationalMessageManager.getMessageExchangeLogEntry(TextSecurePreferences.getLocalNumber(getApplicationContext()), true, "mms", time.getTime()));
 
     ContentValues contentValues = new ContentValues();
     contentValues.put(DATE_SENT, message.getSentTimeMillis());

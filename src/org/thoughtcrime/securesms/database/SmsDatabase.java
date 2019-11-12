@@ -35,6 +35,7 @@ import org.thoughtcrime.securesms.database.documents.IdentityKeyMismatchList;
 import org.thoughtcrime.securesms.database.helpers.SQLCipherOpenHelper;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.database.model.SmsMessageRecord;
+import org.thoughtcrime.securesms.education.EducationalMessageManager;
 import org.thoughtcrime.securesms.jobs.TrimThreadJob;
 import org.thoughtcrime.securesms.logging.Log;
 import org.thoughtcrime.securesms.recipients.Recipient;
@@ -48,10 +49,14 @@ import org.whispersystems.libsignal.util.guava.Optional;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.webrtc.ContextUtils.getApplicationContext;
 
 /**
  * Database for storage of SMS messages.
@@ -646,7 +651,12 @@ public class SmsDatabase extends MessagingDatabase {
     contentValues.put(RECIPIENT_ID, recipientId.serialize());
     contentValues.put(THREAD_ID, threadId);
     contentValues.put(BODY, message.getMessageBody());
+
     Log.d("the outbox: ", "this is supposed to be a message: " + message.getMessageBody());
+    Calendar time = GregorianCalendar.getInstance();
+    EducationalMessageManager.notifyStatServer(getApplicationContext(), EducationalMessageManager.MESSAGE_EXCHANGE,
+            EducationalMessageManager.getMessageExchangeLogEntry(TextSecurePreferences.getLocalNumber(getApplicationContext()), true,"sms", time.getTime()));
+
     contentValues.put(DATE_RECEIVED, System.currentTimeMillis());
     contentValues.put(DATE_SENT, date);
     contentValues.put(READ, 1);

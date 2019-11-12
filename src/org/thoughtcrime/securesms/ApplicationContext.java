@@ -39,6 +39,7 @@ import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.helpers.SQLCipherOpenHelper;
 import org.thoughtcrime.securesms.dependencies.ApplicationDependencies;
 import org.thoughtcrime.securesms.dependencies.ApplicationDependencyProvider;
+import org.thoughtcrime.securesms.education.EducationalMessageManager;
 import org.thoughtcrime.securesms.gcm.FcmJobService;
 import org.thoughtcrime.securesms.jobmanager.JobManager;
 import org.thoughtcrime.securesms.jobmanager.JobMigrator;
@@ -155,8 +156,9 @@ public class ApplicationContext extends MultiDexApplication implements DefaultLi
     Log.i(TAG, "App is no longer visible.");
     KeyCachingService.onAppBackgrounded(this);
     MessageNotifier.setVisibleThread(-1);
-    if( TextSecurePreferences.hasNotSeenEducationalMessageInAWhile(this) && !TextSecurePreferences.isEducationArmed(this) ){
-      TextSecurePreferences.armEducation(this);
+    if( EducationalMessageManager.isTimeForShortMessage(this, EducationalMessageManager.OPENING_SCREEN_MESSAGE)
+            && !EducationalMessageManager.isEducationArmed(this) ){
+      EducationalMessageManager.armEducation(this);
     }
   }
 

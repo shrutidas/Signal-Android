@@ -170,7 +170,8 @@ public abstract class PassphraseRequiredActionBarActivity extends BaseActionBarA
       return STATE_UI_BLOCKING_UPGRADE;
     } else if (!TextSecurePreferences.hasSeenWelcomeScreen(this)) {
       return STATE_WELCOME_SCREEN;
-    } else if (EducationalMessageManager.isTimeForShortMessage( this) && TextSecurePreferences.isEducationArmed(this)){
+    } else if (EducationalMessageManager.isTimeForShortMessage( this, EducationalMessageManager.OPENING_SCREEN_MESSAGE)
+            && EducationalMessageManager.isEducationArmed(this)){
       //must make sure this only happens when the user opens the app.
       return STATE_EDUCATIONAL_MESSAGE;
     } else if (!TextSecurePreferences.hasPromptedPushRegistration(this)) {

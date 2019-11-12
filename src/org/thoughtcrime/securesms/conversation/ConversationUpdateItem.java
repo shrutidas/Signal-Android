@@ -21,6 +21,7 @@ import org.thoughtcrime.securesms.database.IdentityDatabase;
 import org.thoughtcrime.securesms.database.IdentityDatabase.IdentityRecord;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.education.EducationalMessageManager;
+import org.thoughtcrime.securesms.education.LongEducationalMessageActivity;
 import org.thoughtcrime.securesms.logging.Log;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.recipients.LiveRecipient;
@@ -228,7 +229,7 @@ public class ConversationUpdateItem extends LinearLayout
     icon.setImageResource(R.drawable.ic_check_white_24dp);
 
     icon.setColorFilter(new PorterDuffColorFilter(Color.parseColor("#757575"), PorterDuff.Mode.MULTIPLY));
-    body.setText(EducationalMessageManager.getShortMessage(getContext()));//messageRecord.getDisplayBody(getContext()));
+    body.setText(EducationalMessageManager.getShortMessage(getContext()).getMessageString(getContext()));//messageRecord.getDisplayBody(getContext()));
 
     title.setVisibility(GONE);
     body.setVisibility(VISIBLE);
@@ -267,6 +268,13 @@ public class ConversationUpdateItem extends LinearLayout
 
     @Override
     public void onClick(View v) {
+      if ( messageRecord.isEducationalMessage()){
+
+        Intent educationIntent = new Intent(getContext(), LongEducationalMessageActivity.class);
+        getContext().startActivity(educationIntent);
+      }
+
+
       if ((!messageRecord.isIdentityUpdate()  &&
            !messageRecord.isIdentityDefault() &&
            !messageRecord.isIdentityVerified()) ||

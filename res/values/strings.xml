@@ -50,6 +50,15 @@ It’s important to note that TextLight and end-to-end encryption cannot protect
     </string>
 
 
+    <string name="study_reminder">The topic is bla</string>
+    <string name="study_reminder_title">Please don\'t forget touse the app today</string>
+    <string name="study_reminder_action">Click to open Signal for today\'s task</string>
+
+    <string name="usage_reminder">Reminder time setting</string>
+
+
+
+
 
     <string name="learn_more">Learn More</string>
 

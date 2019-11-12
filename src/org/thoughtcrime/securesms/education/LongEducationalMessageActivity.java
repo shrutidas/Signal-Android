@@ -1,13 +1,19 @@
 package org.thoughtcrime.securesms.education;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import org.thoughtcrime.securesms.BaseActionBarActivity;
 import org.thoughtcrime.securesms.PassphraseRequiredActionBarActivity;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.permissions.Permissions;
@@ -16,29 +22,74 @@ import org.thoughtcrime.securesms.util.DynamicLanguage;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
 
-public class LongEducationalMessageActivity extends PassphraseRequiredActionBarActivity {
+import java.util.Calendar;
+
+public class LongEducationalMessageActivity extends BaseActionBarActivity {
 
 
     private final DynamicTheme dynamicTheme    = new DynamicTheme();
     private final DynamicLanguage dynamicLanguage = new DynamicLanguage();
 
-    @Override
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
+
+
+
     public void onPreCreate() {
         dynamicTheme.onCreate(this);
         dynamicLanguage.onCreate(this);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState, boolean onReady) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        onPreCreate();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.more_about_e2ee);
 
 
 
+
         setContentView(R.layout.long_message_activity);
         overridePendingTransition(R.anim.slide_from_end, R.anim.slide_to_start);
 
+        Log.d("long educational messge", "on create");
+
+
+        Context context = getApplicationContext();
+        alarmMgr = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(context, AppUseNotifierService.class);
+        alarmIntent = PendingIntent.getService(context, 0, intent, 0);
+
+        // Set the alarm to start at 8:30 a.m.
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        calendar.set(Calendar.MINUTE, 30);
+
+
+        alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() +
+                        15 * 1000, alarmIntent);
+
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        if (isFinishing()) {
+            overridePendingTransition(R.anim.slide_from_start, R.anim.slide_to_end);
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        dynamicTheme.onResume(this);
+        dynamicLanguage.onResume(this);
     }
 
     @Override
@@ -50,36 +101,12 @@ public class LongEducationalMessageActivity extends PassphraseRequiredActionBarA
         return false;
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Permissions.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
     }
 
-    private void onTermsClicked() {
-        CommunicationActions.openBrowserLink(this, "https://signal.org/legal");
-    }
 
-    private void onContinueClicked() {
-        Permissions.with(this)
-                .request(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_PHONE_STATE)
-                .ifNecessary()
-                .withRationaleDialog(getString(R.string.RegistrationActivity_signal_needs_access_to_your_contacts_and_media_in_order_to_connect_with_friends),
-                        R.drawable.ic_contacts_white_48dp, R.drawable.ic_folder_white_48dp)
-                .onAnyResult(() -> {
-
-                    Intent nextIntent = getIntent().getParcelableExtra("next_intent");
-
-                    if (nextIntent == null) {
-                        throw new IllegalStateException("Was not supplied a next_intent.");
-                    }
-
-                    startActivity(nextIntent);
-                    overridePendingTransition(R.anim.slide_from_end, R.anim.fade_scale_out);
-                    finish();
-                })
-                .execute();
-    }
 }
 

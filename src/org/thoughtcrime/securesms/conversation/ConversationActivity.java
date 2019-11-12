@@ -145,6 +145,7 @@ import org.thoughtcrime.securesms.database.identity.IdentityRecordList;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.database.model.MmsMessageRecord;
 import org.thoughtcrime.securesms.database.model.StickerRecord;
+import org.thoughtcrime.securesms.education.EducationalMessageManager;
 import org.thoughtcrime.securesms.events.ReminderUpdateEvent;
 import org.thoughtcrime.securesms.giph.ui.GiphyActivity;
 import org.thoughtcrime.securesms.jobs.MultiDeviceBlockedUpdateJob;
@@ -421,12 +422,14 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
     Context c = this;
 
 
+
     new AsyncTask<Recipient, Void, Void>() {
       @Override
       protected Void doInBackground(Recipient... params) {
         synchronized (SESSION_LOCK) {
 
-          EducationalUtil.sendEducationalMessage( c, recipient.get(), true, false);
+          if(EducationalMessageManager.isTimeForShortMessage(c, EducationalMessageManager.IN_CONVERSATION_MESSAGE))
+            EducationalUtil.sendEducationalMessage( c, recipient.get(), true, false);
 
         }
         return null;

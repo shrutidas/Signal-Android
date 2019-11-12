@@ -39,7 +39,9 @@ public class WelcomeActivity extends BaseActionBarActivity {
         .withRationaleDialog(getString(R.string.RegistrationActivity_signal_needs_access_to_your_contacts_and_media_in_order_to_connect_with_friends),
             R.drawable.ic_contacts_white_48dp, R.drawable.ic_folder_white_48dp)
         .onAnyResult(() -> {
+
           TextSecurePreferences.unarmEducation(WelcomeActivity.this);
+          TextSecurePreferences.setHasSeenWelcomeScreen(WelcomeActivity.this, true);
 
           Intent nextIntent = getIntent().getParcelableExtra("next_intent");
 

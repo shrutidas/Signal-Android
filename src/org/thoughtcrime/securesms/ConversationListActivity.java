@@ -30,12 +30,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.widget.TooltipCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -49,6 +51,7 @@ import org.thoughtcrime.securesms.contacts.avatars.ContactColors;
 import org.thoughtcrime.securesms.contacts.avatars.GeneratedContactPhoto;
 import org.thoughtcrime.securesms.contacts.avatars.ProfileContactPhoto;
 import org.thoughtcrime.securesms.conversation.ConversationActivity;
+import org.thoughtcrime.securesms.database.Address;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MessagingDatabase.MarkedMessageInfo;
 import org.thoughtcrime.securesms.lock.RegistrationLockDialog;
@@ -65,10 +68,14 @@ import org.thoughtcrime.securesms.util.DynamicNoActionBarTheme;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.EducationalUtil;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
+import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.concurrent.SimpleTask;
 import org.thoughtcrime.securesms.education.*;
 import org.whispersystems.libsignal.util.guava.Optional;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.whispersystems.libsignal.SessionCipher.SESSION_LOCK;
@@ -94,6 +101,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     dynamicLanguage.onCreate(this);
   }
 
+  @SuppressLint("StaticFieldLeak")
   @Override
   protected void onCreate(Bundle icicle, boolean ready) {
     setContentView(R.layout.conversation_list_activity);
@@ -117,36 +125,50 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
     Context c = this;
 
-    if(EducationalMessageManager.isTimeForShortMessage(c)){
-
+    try{
       new AsyncTask<Recipient, Void, Void>() {
         @Override
         protected Void doInBackground(Recipient... params) {
           synchronized (SESSION_LOCK) {
+            if(EducationalMessageManager.isTimeForShortMessage(c, EducationalMessageManager.TOOL_TIP_MESSAGE)){
 
-            TooltipPopup.forTarget(fragmentContainer)
-                    .setBackgroundTint(getResources().getColor(R.color.core_blue))
-                    .setTextColor(getResources().getColor(R.color.core_white))
-                    .setText(EducationalMessageManager.getShortMessageID(c))
-                    .show(TooltipPopup.POSITION_BELOW)
-                    .getContentView().setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ConversationListActivity.this);
-                builder.setIconAttribute(R.attr.dialog_alert_icon);
-                builder.setTitle("More about ");
+              Calendar time = GregorianCalendar.getInstance();
+              EducationalMessage educationalMessage = EducationalMessageManager.getShortMessage(c);
 
-                builder.show();
-              }
-            });
+              final Address localAddress = Address.fromSerialized(TextSecurePreferences.getLocalNumber(c));
+              localAddress.toPhoneString();
 
 
+              TooltipPopup ttp = TooltipPopup.forTarget(fragmentContainer)
+                      .setBackgroundTint(getResources().getColor(R.color.core_blue))
+                      .setTextColor(getResources().getColor(R.color.core_white))
+                      .setText(educationalMessage.getStringID())
+                      .show(TooltipPopup.POSITION_BELOW);
+
+              ttp.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                  long timePassedInMs = GregorianCalendar.getInstance().getTimeInMillis()-time.getTimeInMillis();
+
+                  EducationalMessageManager.notifyStatServer(c, EducationalMessageManager.MESSAGE_SHOWN,
+                          EducationalMessageManager.getMessageShownLogEntry( TextSecurePreferences.getLocalNumber(c),"conversation",
+                                  EducationalMessageManager.TOOL_TIP_MESSAGE, educationalMessage.getMessageName(), time.getTime(), timePassedInMs ));
+
+                }
+              });
+            }
           }
           return null;
         }
       }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
+
+    } catch ( RuntimeException e){
+
+      Log.d("exception", "couldn't send tooltip");
+
     }
+
 
 
 
