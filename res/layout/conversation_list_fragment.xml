@@ -50,7 +50,7 @@
                   android:orientation="vertical"
                   tools:visibility="gone">
 
-        <org.thoughtcrime.securesms.components.reminder.ReminderView
+        <org.securityed.securesms.components.reminder.ReminderView
                 android:id="@+id/reminder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -68,7 +68,7 @@
 
     </LinearLayout>
 
-    <org.thoughtcrime.securesms.components.registration.PulsingFloatingActionButton
+    <org.securityed.securesms.components.registration.PulsingFloatingActionButton
         android:id="@+id/camera_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -81,7 +81,7 @@
         android:focusable="true"
         app:backgroundTint="?conversation_list_camera_button_background"/>
 
-    <org.thoughtcrime.securesms.components.registration.PulsingFloatingActionButton
+    <org.securityed.securesms.components.registration.PulsingFloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
