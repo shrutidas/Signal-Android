@@ -188,6 +188,7 @@ public class ContactSelectionListAdapter extends CursorRecyclerViewAdapter<ViewH
                 drawables.getColor(1, 0xff000000);
 
     viewHolder.unbind(glideRequests);
+    //name
     viewHolder.bind(glideRequests, id, contactType, name, number, labelText, color, multiSelect);
     viewHolder.setChecked(selectedContacts.contains(number));
   }

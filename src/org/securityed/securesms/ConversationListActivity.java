@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -105,16 +106,16 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
     setSupportActionBar(toolbar);
 
     searchToolbar            = findViewById(R.id.search_toolbar);
-    searchAction             = findViewById(R.id.search_action);
+    //searchAction             = findViewById(R.id.search_action);
     fragmentContainer        = findViewById(R.id.fragment_container);
     conversationListFragment = initFragment(R.id.fragment_container, new ConversationListFragment(), dynamicLanguage.getCurrentLocale());
 
     initializeSearchListener();
 
-    RatingManager.showRatingDialogIfNecessary(this);
+    //RatingManager.showRatingDialogIfNecessary(this);
     RegistrationLockDialog.showReminderIfNecessary(this);
 
-    TooltipCompat.setTooltipText(searchAction, getText(R.string.SearchToolbar_search_for_conversations_contacts_and_messages));
+    //TooltipCompat.setTooltipText(searchAction, getText(R.string.SearchToolbar_search_for_conversations_contacts_and_messages));
 
 
 
@@ -139,14 +140,14 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
               TooltipPopup.Builder ttpb = TooltipPopup.forTarget(searchToolbar)
                       .setBackgroundTint(getResources().getColor(R.color.core_blue))
                       .setTextColor(getResources().getColor(R.color.core_white))
-                      .setText(educationalMessage.getStringID())
+                      .setText( R.string.dummy)// educationalMessage.getStringID())
                       .setOnDismissListener(new PopupWindow.OnDismissListener() {
                 @Override
                 public void onDismiss() {
                   long timePassedInMs = GregorianCalendar.getInstance().getTimeInMillis()-time.getTimeInMillis();
 
                   EducationalMessageManager.notifyStatServer(c, EducationalMessageManager.MESSAGE_SHOWN,
-                          EducationalMessageManager.getMessageShownLogEntry( TextSecurePreferences.getLocalNumber(c),"conversation",
+                          EducationalMessageManager.getMessageShownLogEntry( TextSecurePreferences.getLocalNumber(c),"conversationList",
                                   EducationalMessageManager.TOOL_TIP_MESSAGE, educationalMessage.getMessageName(), time.getTime(), timePassedInMs ));
 
                 }
@@ -155,8 +156,8 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
               runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-                  ttpb.show(TooltipPopup.POSITION_BELOW);
+                  TooltipPopup tooltip = ttpb.show(TooltipPopup.POSITION_MIDDLE);
+                  Log.d("after show: ", "" + tooltip.getContentView().getWidth());
 
                 }
               });
@@ -201,6 +202,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
 
     inflater.inflate(R.menu.text_secure_normal, menu);
 
+    menu.findItem(R.id.menu_invite).setVisible(false); // we don't need no new invites!
     menu.findItem(R.id.menu_clear_passphrase).setVisible(!TextSecurePreferences.isPasswordDisabled(this));
 
     super.onPrepareOptionsMenu(menu);
@@ -208,7 +210,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
   }
 
   private void initializeSearchListener() {
-    searchAction.setOnClickListener(v -> {
+    /*searchAction.setOnClickListener(v -> {
       Permissions.with(this)
                  .request(Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS)
                  .ifNecessary()
@@ -216,7 +218,7 @@ public class ConversationListActivity extends PassphraseRequiredActionBarActivit
                                                            searchAction.getY() + (searchAction.getHeight() / 2)))
                  .withPermanentDenialDialog(getString(R.string.ConversationListActivity_signal_needs_contacts_permission_in_order_to_search_your_contacts_but_it_has_been_permanently_denied))
                  .execute();
-    });
+    });*/
 
     searchToolbar.setListener(new SearchToolbar.SearchListener() {
       @Override

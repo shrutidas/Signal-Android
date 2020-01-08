@@ -12,13 +12,16 @@ import androidx.annotation.Nullable;
  * observe changes on. These classes essentially do nothing except exist so Android doesn't complain.
  */
 public class DatabaseContentProviders {
+  
+  // changed org. to org.
 
   public static class ConversationList extends NoopContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse("content://org.org.securityed.securesms.database.conversationlist");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.securityed.securesms.database.conversationlist");
   }
 
   public static class Conversation extends NoopContentProvider {
-    private static final String CONTENT_URI_STRING = "content://org.org.securityed.securesms.database.conversation/";
+    int i = 0;
+    private static final String CONTENT_URI_STRING = "content://org.securityed.securesms.database.conversation/";
 
     public static Uri getUriForThread(long threadId) {
       return Uri.parse(CONTENT_URI_STRING + threadId);
@@ -26,15 +29,15 @@ public class DatabaseContentProviders {
   }
 
   public static class Attachment extends NoopContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse("content://org.org.securityed.securesms.database.attachment");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.securityed.securesms.database.attachment");
   }
 
   public static class Sticker extends NoopContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse("content://org.org.securityed.securesms.database.sticker");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.securityed.securesms.database.sticker");
   }
 
   public static class StickerPack extends NoopContentProvider {
-    public static final Uri CONTENT_URI = Uri.parse("content://org.org.securityed.securesms.database.stickerpack");
+    public static final Uri CONTENT_URI = Uri.parse("content://org.securityed.securesms.database.stickerpack");
   }
 
   private static abstract class NoopContentProvider extends ContentProvider {

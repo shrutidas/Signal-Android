@@ -22,6 +22,7 @@ import org.w3c.dom.Text;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -44,6 +45,10 @@ public class EducationalMessageManager {
     public static final String MESSAGE_SHOWN = "message_shown";
     public static final String MESSAGE_EXCHANGE = "message_exchange";
 
+    public static final int GET_SMS_CODE = 0;
+    public static final int GET_PHONE_NUM = 1;
+    public static final int CONTROL_PHONE_NUM = 2;
+
     private static String serverResponseCode = null;
 
 
@@ -62,6 +67,10 @@ public class EducationalMessageManager {
 
 
     public static boolean isTimeForShortMessage(Context context, int messagePlaceCode){
+        if(!TextSecurePreferences.isExperimentalGroup(context)){
+            return false;
+        }
+
         switch(messagePlaceCode){
         case IN_CONVERSATION_MESSAGE:
             return false;
@@ -76,16 +85,17 @@ public class EducationalMessageManager {
 
     }
 
-    private static String formatDateString( String date){
-        return date.replace(" ", "_").replace(":", "-");
+    //TODO fix this thing. we want the timezone together with the unix time.
+    private static String formatDateString( Date date){
+        return date.toString().replace(" ", "_").replace(":", "-") + "_" + date.getTime();
     }
 
-    public static String getMessageShownLogEntry(String phoneNumber, String screen, int messageType, String version, Date date, long timeElapsed){
-        return phoneNumber + "_" + screen + "_" + messageType + "_" + version + "_" + formatDateString(date.toString()) + "_" + timeElapsed;
+    public static String getMessageShownLogEntry( String phoneNumber, String screen, int messageType, String version, Date date, long timeElapsed){
+        return phoneNumber + "_" + screen + "_" + messageType + "_" + version + "_" + formatDateString(date) + "_" + timeElapsed;
     }
 
     public static String getMessageExchangeLogEntry(String phoneNumber, Boolean sent, String messageType, Date date){
-        return phoneNumber + "_" + sent + "_" + messageType + "_" + formatDateString(date.toString());
+        return phoneNumber + "_" + sent + "_" + messageType + "_" + formatDateString(date);
     }
 
     public static void notifyStatServer(Context context, String args ){
@@ -106,9 +116,6 @@ public class EducationalMessageManager {
 
                 Log.e("uhh", error.toString());
 
-                //TODO add the sent logs that weren't sent to shared preferences.
-                // we will attempt to send these later.
-
                 TextSecurePreferences.addToUnsentLogs(context, args);
             }
         });
@@ -122,18 +129,31 @@ public class EducationalMessageManager {
         notifyStatServer(context, args);
     }
 
-    //hasPhone true -> get the registration code for that phone number
-    //         false -> get an unused phone number
-    public static String getRegistration(String phoneNumber, Context context, Boolean hasPhone){
 
-        RequestQueue queue = Volley.newRequestQueue(context);
-        String url;
-        if(hasPhone){
-            url = "https://akgul.cs.umd.edu/register/?get_sms_code=" + phoneNumber;
-        } else {
-            url = "https://akgul.cs.umd.edu/register/get_phone_num/";
+    public static String registrationRequest(String phoneNumber, Context context, int request_type){
+
+        String url = "";
+        switch (request_type){
+            case GET_SMS_CODE:
+                url = "https://akgul.cs.umd.edu/register/?get_sms_code=" + phoneNumber;
+                break;
+            case GET_PHONE_NUM:
+                url = "https://akgul.cs.umd.edu/register/get_phone_num/";
+                break;
+            case CONTROL_PHONE_NUM:
+                url = "https://akgul.cs.umd.edu/register/can_use/?num=" + phoneNumber;
+                break;
         }
 
+        return serverRequestBlocking(context, url);
+
+
+        //  https://akgul.cs.umd.edu/register/?get_recent_code=+12015847635
+    }
+
+    public static String serverRequestBlocking(Context context, String url){
+
+        RequestQueue queue = Volley.newRequestQueue(context);
 
         String serverResponse = null;
 
@@ -141,19 +161,20 @@ public class EducationalMessageManager {
         StringRequest stringRequest = new StringRequest(StringRequest.Method.GET, url, future, future);
         queue.add(stringRequest);
 
+        Log.d("blocking req", url);
+
         try {
             serverResponse = future.get(); // this will block
-            Log.d("message manager", serverResponse);
+            Log.d("volley block response", serverResponse);
         } catch (InterruptedException e) {
             Log.d("volley blocking", e.getMessage());
         } catch (ExecutionException e) {
             Log.d("volley blocking", e.getMessage());
+        } catch (Exception e){
+            Log.d("volley blocking", e.toString());
         }
 
         return serverResponse;
-
-
-        //  https://akgul.cs.umd.edu/register/?get_recent_code=+12015847635
     }
 
 
@@ -220,6 +241,7 @@ public class EducationalMessageManager {
 
                 for(String log:logs){
                     notifyStatServer(context, log);
+                    SystemClock.sleep(200);
                 }
 
                 return null;

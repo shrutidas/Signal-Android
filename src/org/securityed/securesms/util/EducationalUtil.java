@@ -72,7 +72,7 @@ public class EducationalUtil {
         Log.i(TAG, "Inserting verified outbox...");
         DatabaseFactory.getSmsDatabase(context).insertMessageOutbox(threadId, outgoing, false, time, null, false);
         Calendar c = GregorianCalendar.getInstance();
-        EducationalMessageManager.notifyStatServer(context, EducationalMessageManager.MESSAGE_SHOWN, EducationalMessageManager.getMessageShownLogEntry( TextSecurePreferences.getLocalNumber(context), "conversation", EducationalMessageManager.IN_CONVERSATION_MESSAGE,
+        EducationalMessageManager.notifyStatServer(context, EducationalMessageManager.MESSAGE_SHOWN, EducationalMessageManager.getMessageShownLogEntry( TextSecurePreferences.getLocalNumber(context), "inConversation", EducationalMessageManager.IN_CONVERSATION_MESSAGE,
                 em.getMessageName(), c.getTime(), -1));
 
         /*

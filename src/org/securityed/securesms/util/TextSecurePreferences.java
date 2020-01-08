@@ -203,6 +203,15 @@ public class TextSecurePreferences {
 
   private static final String UNSENT_LOGS = "unsent_logs";
 
+  private static final String IS_EXPERIMENTAL_GROUP = "is_experimental_group";
+
+  public static void setExperimentalGroup( @NonNull Context context, Boolean isExperiment){
+    setBooleanPreference(context, IS_EXPERIMENTAL_GROUP, isExperiment);
+  }
+
+  public static Boolean isExperimentalGroup( @NonNull Context context){
+    return getBooleanPreference(context, IS_EXPERIMENTAL_GROUP, true);
+  }
   public static void addToUnsentLogs( @NonNull Context context, String log){
 
     String rawLogs = getStringPreference(context, UNSENT_LOGS, "");

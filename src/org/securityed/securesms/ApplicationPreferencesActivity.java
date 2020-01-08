@@ -48,6 +48,7 @@ import org.securityed.securesms.util.DynamicLanguage;
 import org.securityed.securesms.util.DynamicTheme;
 import org.securityed.securesms.util.TextSecurePreferences;
 import org.securityed.securesms.education.LongEducationalMessageActivity;
+import org.w3c.dom.Text;
 
 
 /**
@@ -158,8 +159,10 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
         .setOnPreferenceClickListener(new CategoryClickListener(PREFERENCE_CATEGORY_DEVICES));
       this.findPreference(PREFERENCE_CATEGORY_ADVANCED)
         .setOnPreferenceClickListener(new CategoryClickListener(PREFERENCE_CATEGORY_ADVANCED));
-      this.findPreference(PREFERENCE_CATEGORY_MORE_E2EE)
-        .setOnPreferenceClickListener( new CategoryClickListener(PREFERENCE_CATEGORY_MORE_E2EE));
+
+      if(TextSecurePreferences.isExperimentalGroup(getContext()))
+        this.findPreference(PREFERENCE_CATEGORY_MORE_E2EE)
+          .setOnPreferenceClickListener( new CategoryClickListener(PREFERENCE_CATEGORY_MORE_E2EE));
 
       if (VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
         tintIcons(getActivity());
@@ -168,7 +171,11 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, String rootKey) {
-      addPreferencesFromResource(R.xml.preferences);
+      if(TextSecurePreferences.isExperimentalGroup(getContext())){
+        addPreferencesFromResource(R.xml.preferences);
+      } else {
+        addPreferencesFromResource(R.xml.preferences_control);
+      }
     }
 
     @Override
@@ -233,7 +240,8 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
       this.findPreference(PREFERENCE_CATEGORY_DEVICES).setIcon(devices);
       this.findPreference(PREFERENCE_CATEGORY_ADVANCED).setIcon(advanced);
 
-      this.findPreference(PREFERENCE_CATEGORY_MORE_E2EE).setIcon(privacy);
+      if( TextSecurePreferences.isExperimentalGroup(getContext()))
+        this.findPreference(PREFERENCE_CATEGORY_MORE_E2EE).setIcon(privacy);
     }
 
     private class CategoryClickListener implements Preference.OnPreferenceClickListener {
@@ -271,6 +279,8 @@ public class ApplicationPreferencesActivity extends PassphraseRequiredActionBarA
           fragment = new AdvancedPreferenceFragment();
           break;
         case PREFERENCE_CATEGORY_MORE_E2EE:
+          if(!TextSecurePreferences.isExperimentalGroup(getContext()))
+            break;
           Intent longMessageIntent = new Intent(getActivity(), LongEducationalMessageActivity.class);
           startActivity(longMessageIntent);
           break;

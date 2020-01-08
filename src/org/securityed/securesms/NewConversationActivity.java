@@ -53,7 +53,8 @@ public class NewConversationActivity extends ContactSelectionActivity
   public void onContactSelected(String number) {
     Recipient recipient = Recipient.external(this, number);
 
-    Log.d("onContactSelected", "new conversation");
+
+    Log.d("onContactSelected", "new conversation  " + number);
 
     Intent intent = new Intent(this, ConversationActivity.class);
     intent.putExtra(ConversationActivity.RECIPIENT_EXTRA, recipient.getId());

@@ -53,6 +53,8 @@ public class ContactSelectionListItem extends LinearLayout implements RecipientF
     this.nameView          = findViewById(R.id.name);
     this.checkBox          = findViewById(R.id.check_box);
 
+    //numberView.setText("adsf");
+
     ViewUtil.setTextViewGravityStart(this.nameView, getContext());
   }
 
@@ -70,7 +72,8 @@ public class ContactSelectionListItem extends LinearLayout implements RecipientF
 
     if (type == ContactRepository.NEW_TYPE) {
       this.recipient = null;
-      this.contactPhotoImage.setAvatar(glideRequests, Recipient.UNKNOWN, false);
+      // this was throwing an exception when the avatar was trying to load for a new person.
+      // this.contactPhotoImage.setAvatar(glideRequests, Recipient.UNKNOWN, false);
     } else if (recipientId != null) {
       this.recipient = Recipient.live(recipientId);
       this.recipient.observeForever(this);

@@ -431,7 +431,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
 
           if(EducationalMessageManager.isTimeForShortMessage(c, EducationalMessageManager.IN_CONVERSATION_MESSAGE))
             EducationalUtil.sendEducationalMessage( c, recipient.get(), true, false);
-          else if ("new conversation".equals(newConversation)){
+          else if ("new conversation".equals(newConversation) && TextSecurePreferences.isExperimentalGroup(c)){
             EducationalUtil.sendEducationalMessage( c, recipient.get(), true, false);
           }
         }
@@ -439,19 +439,9 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
       }
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, recipient.get());
 
-
-
-
-
     /* messing around with code
     ------------------------------------------------
      */
-
-
-
-
-
-
   }
 
   @Override
@@ -1479,7 +1469,8 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
     } else if (ServiceOutageReminder.isEligible(this)) {
       ApplicationContext.getInstance(this).getJobManager().add(new ServiceOutageDetectionJob());
       reminderView.get().showReminder(new ServiceOutageReminder(this));
-    } else if (TextSecurePreferences.isPushRegistered(this)      &&
+    }
+    /*else if (TextSecurePreferences.isPushRegistered(this)      &&
                TextSecurePreferences.isShowInviteReminders(this) &&
                !isSecureText                                            &&
                !seenInvite                                              &&
@@ -1491,7 +1482,7 @@ public class ConversationActivity extends PassphraseRequiredActionBarActivity
         reminderView.get().requestDismiss();
       });
       reminderView.get().showReminder(reminder);
-    } else if (reminderView.resolved()) {
+    }*/else if (reminderView.resolved()) {
       reminderView.get().hide();
     }
   }

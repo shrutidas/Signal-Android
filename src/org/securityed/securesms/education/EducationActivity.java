@@ -66,9 +66,9 @@ public class EducationActivity extends BaseActionBarActivity {
 
     private void onContinueClicked() {
         Permissions.with(this)
-                .request(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_PHONE_STATE)
+                //Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS,Manifest.permission.READ_PHONE_STATE
+                .request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+                        )
                 .ifNecessary()
                 .withRationaleDialog(getString(R.string.RegistrationActivity_signal_needs_access_to_your_contacts_and_media_in_order_to_connect_with_friends),
                         R.drawable.ic_contacts_white_48dp, R.drawable.ic_folder_white_48dp)

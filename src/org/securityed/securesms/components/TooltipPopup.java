@@ -7,6 +7,9 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +32,8 @@ public class TooltipPopup extends PopupWindow {
   public static final int POSITION_BELOW = 1;
   public static final int POSITION_START = 2;
   public static final int POSITION_END   = 3;
+  public static final int POSITION_MIDDLE = 6;
+
 
   private static final int POSITION_LEFT  = 4;
   private static final int POSITION_RIGHT = 5;
@@ -61,10 +66,12 @@ public class TooltipPopup extends PopupWindow {
       case POSITION_BELOW: arrow = getContentView().findViewById(R.id.tooltip_arrow_top); break;
       case POSITION_START: arrow = getContentView().findViewById(R.id.tooltip_arrow_end); break;
       case POSITION_END:   arrow = getContentView().findViewById(R.id.tooltip_arrow_start); break;
+      case POSITION_MIDDLE: arrow = null; break;
       default: throw new AssertionError("Invalid position!");
     }
 
-    arrow.setVisibility(View.VISIBLE);
+    if( arrow != null )
+      arrow.setVisibility(View.VISIBLE);
 
     TextView textView = getContentView().findViewById(R.id.tooltip_text);
     textView.setText(text);
@@ -77,10 +84,12 @@ public class TooltipPopup extends PopupWindow {
 
     if (backgroundTint == 0) {
       bubble.getBackground().setColorFilter(ThemeUtil.getThemedColor(anchor.getContext(), R.attr.tooltip_default_color), PorterDuff.Mode.MULTIPLY);
-      arrow.setColorFilter(ThemeUtil.getThemedColor(anchor.getContext(), R.attr.tooltip_default_color), PorterDuff.Mode.MULTIPLY);
+      if (arrow != null)
+        arrow.setColorFilter(ThemeUtil.getThemedColor(anchor.getContext(), R.attr.tooltip_default_color), PorterDuff.Mode.MULTIPLY);
     } else {
       bubble.getBackground().setColorFilter(backgroundTint, PorterDuff.Mode.MULTIPLY);
-      arrow.setColorFilter(backgroundTint, PorterDuff.Mode.MULTIPLY);
+      if (arrow != null)
+        arrow.setColorFilter(backgroundTint, PorterDuff.Mode.MULTIPLY);
     }
 
     if (iconGlideModel != null) {
@@ -106,7 +115,7 @@ public class TooltipPopup extends PopupWindow {
       return;
     }
 
-    getContentView().measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+    getContentView().measure(View.MeasureSpec.makeMeasureSpec(anchor.getWidth(), View.MeasureSpec.AT_MOST),
                              View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 
     int tooltipSpacing = anchor.getContext().getResources().getDimensionPixelOffset(R.dimen.tooltip_popup_margin);
@@ -133,11 +142,16 @@ public class TooltipPopup extends PopupWindow {
         xoffset = anchor.getWidth() + tooltipSpacing;
         yoffset = -(getContentView().getMeasuredHeight()/2 + anchor.getHeight()/2);
         break;
+      case POSITION_MIDDLE:
+        xoffset = tooltipSpacing;//anchor.getMeasuredWidth()/2 - getContentView().getMeasuredWidth()/2;
+        Log.d("measurement widths:", anchor.getMeasuredWidth() + " " + getContentView().getMeasuredWidth());
+        yoffset = tooltipSpacing;
+        break;
       default:
         throw new AssertionError("Invalid tooltip position!");
     }
 
-    showAsDropDown(anchor, xoffset, yoffset);
+    showAsDropDown(anchor, xoffset, yoffset, Gravity.CENTER);
   }
 
   private void onLayout(@NonNull Runnable runnable) {
@@ -164,7 +178,7 @@ public class TooltipPopup extends PopupWindow {
   }
 
   private static int getRtlPosition(@NonNull Context context, int position) {
-    if (position == POSITION_ABOVE || position == POSITION_BELOW) {
+    if (position == POSITION_ABOVE || position == POSITION_BELOW || position == POSITION_MIDDLE) {
       return position;
     } else if (context.getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
       return position == POSITION_START ? POSITION_RIGHT : POSITION_LEFT;

@@ -19,6 +19,8 @@ public class WelcomeActivity extends BaseActionBarActivity {
     setContentView(R.layout.registration_welcome_activity);
     findViewById(R.id.welcome_terms_button).setOnClickListener(v -> onTermsClicked());
     findViewById(R.id.welcome_continue_button).setOnClickListener(v -> onContinueClicked());
+
+    TextSecurePreferences.setExperimentalGroup(this, true);
   }
 
   @Override
@@ -27,7 +29,7 @@ public class WelcomeActivity extends BaseActionBarActivity {
   }
 
   private void onTermsClicked() {
-    CommunicationActions.openBrowserLink(this, "https://signal.org/legal");
+    CommunicationActions.openBrowserLink(this, "https://www.cs.umd.edu/~akgul/e2ee/privacy_policy.html");
   }
 
   private void onContinueClicked() {

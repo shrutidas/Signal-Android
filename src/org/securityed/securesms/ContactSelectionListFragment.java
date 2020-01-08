@@ -211,8 +211,9 @@ public final class ContactSelectionListFragment extends    Fragment
     showContactsLayout.setVisibility(View.VISIBLE);
     showContactsProgress.setVisibility(View.INVISIBLE);
     showContactsDescription.setText(R.string.contact_selection_list_fragment__signal_needs_access_to_your_contacts_in_order_to_display_them);
-    showContactsButton.setVisibility(View.VISIBLE);
 
+    showContactsButton.setVisibility(View.INVISIBLE); // we don't need this.
+    /*
     showContactsButton.setOnClickListener(v -> {
       Permissions.with(this)
                  .request(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS)
@@ -224,7 +225,7 @@ public final class ContactSelectionListFragment extends    Fragment
                    }
                  })
                  .execute();
-    });
+    });*/
   }
 
   public void setQueryFilter(String filter) {
@@ -268,7 +269,11 @@ public final class ContactSelectionListFragment extends    Fragment
     }
 
     emptyText.setText(R.string.contact_selection_group_activity__no_contacts);
-    boolean useFastScroller = data.getCount() > 20;
+
+    boolean useFastScroller = false;
+    if(data != null)
+      useFastScroller= data.getCount() > 20;
+
     recyclerView.setVerticalScrollBarEnabled(!useFastScroller);
     if (useFastScroller) {
       fastScroller.setVisibility(View.VISIBLE);

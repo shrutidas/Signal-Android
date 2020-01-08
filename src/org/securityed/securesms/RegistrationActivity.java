@@ -3,6 +3,7 @@ package org.securityed.securesms;
 import android.Manifest;
 import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -175,42 +176,59 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
     initializeChallengeListener();
 
 
-    autoRegister();
+    //autoRegister();
 
   }
 
   @SuppressLint("StaticFieldLeak")
+  //if phone number is null it will request a phone number and an sms code.
+  // if not it'll directly get the sms code that is assumed to be requested by the user.
   private void autoRegister(){
 
-
-
-
-
+    ProgressDialog loadingDialog = ProgressDialog.show(this, "",
+            "Please wait, registering for you.", true);
 
     new AsyncTask< Void, Void, Void>(){
 
       @Override
       protected Void doInBackground(Void... vs){
 
-        while(phoneNumber == null){
-          phoneNumber = EducationalMessageManager.getRegistration( null, getApplicationContext(), false);
-          SystemClock.sleep(5000);
-        }
+        if(phoneNumber == null){
 
-        Log.d("RegistrationActivty", "got phone number" + phoneNumber);
-
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            handleRequestVerification(phoneNumber, true);
+          while(phoneNumber == null){
+            phoneNumber = EducationalMessageManager.registrationRequest( null, getApplicationContext(), EducationalMessageManager.GET_PHONE_NUM);
+            SystemClock.sleep(1000);
           }
-        });
 
+          Log.d("RegistrationActivty", "got phone number" + phoneNumber);
 
-        while(regCode == null){
-          regCode = EducationalMessageManager.getRegistration(phoneNumber, getApplicationContext(), true);
-          SystemClock.sleep(5000);
+          runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              //this function will run the rest of the auto register function.
+              handleRequestVerification(phoneNumber, true, true, false);
+            }
+          });
         }
+
+
+        while(regCode == null || regCode.equals("not here yet")){
+          regCode = EducationalMessageManager.registrationRequest(phoneNumber, getApplicationContext(), EducationalMessageManager.GET_SMS_CODE);
+          SystemClock.sleep(1000);
+        }
+
+        String[] resp = regCode.split("_");
+        Log.d("registration code resp", resp[0] + "_" +  resp[1] + "_");
+        regCode = resp[0];
+        Boolean isExperimentalGroup = resp[1].equals("1");
+
+
+        TextSecurePreferences.setExperimentalGroup(getApplicationContext(), isExperimentalGroup);
+
+        Log.d("isExperimentalGroup", "" +  isExperimentalGroup);
+        Log.d("experimentalness: ", "" + TextSecurePreferences.isExperimentalGroup(getApplicationContext()));
+
+
 
         // poll the server until we have a message.
 
@@ -221,19 +239,12 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
           }
         });
 
+        loadingDialog.dismiss();
+
         return null;
       }
 
-      @Override
-      protected void onPostExecute(@Nullable Void v) {
-
-
-
-
-      }
     }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-
 
   }
 
@@ -527,26 +538,75 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
     }
   }
 
-  private void handleRequestVerification(@NonNull String e164number, boolean gcmSupported) {
-    createButton.setIndeterminateProgressMode(true);
-    createButton.setProgress(50);
+  // this is the unverified version.
+  @SuppressLint("StaticFieldLeak")
+  private void handleRequestVerification(@NonNull String e164number, boolean gcmSupported){
 
-    if (gcmSupported) {
-      SmsRetrieverClient client = SmsRetriever.getClient(this);
-      Task<Void>         task   = client.startSmsRetriever();
+    new AsyncTask<Void, Void, Void>(){
+      @Override
+      protected Void doInBackground(Void... vs){
 
-      task.addOnSuccessListener(none -> {
-        Log.i(TAG, "Successfully registered SMS listener.");
-        requestVerificationCode(e164number, true, true);
-      });
+        Log.d("Registration activity", " number verification step");
 
-      task.addOnFailureListener(e -> {
-        Log.w(TAG, "Failed to register SMS listener.", e);
-        requestVerificationCode(e164number, true, false);
-      });
-    } else {
-      requestVerificationCode(e164number, false, false);
+        String resp = EducationalMessageManager.registrationRequest( e164number, getApplicationContext(), EducationalMessageManager.CONTROL_PHONE_NUM);
+
+        if(resp.equals("true")){ // we got the verified number proceed with normal verification.
+          runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              handleRequestVerification(e164number, gcmSupported, true, true);
+            }
+          });
+        } else {
+          Log.d("not an approved number.", e164number);
+          runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              Toast.makeText(getApplicationContext(), "not an approved number please use the number given to you.", Toast.LENGTH_SHORT).show();
+            }
+          });
+        }
+
+
+        return null;
+      }
+
+    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+
+  }
+
+  //the verified field is there to ensure that the number is an experiment number and not from the user.
+  private void handleRequestVerification(@NonNull String e164number, boolean gcmSupported, boolean verified, boolean autoRegister) {
+
+    if(verified){ // don't do anything if the number isn't verified to be in the test set.
+      createButton.setIndeterminateProgressMode(true);
+      createButton.setProgress(50);
+
+      if (gcmSupported) {
+        SmsRetrieverClient client = SmsRetriever.getClient(this);
+        Task<Void>         task   = client.startSmsRetriever();
+
+        task.addOnSuccessListener(none -> {
+          Log.i(TAG, "Successfully registered SMS listener.");
+          requestVerificationCode(e164number, true, true);
+        });
+
+        task.addOnFailureListener(e -> {
+          Log.w(TAG, "Failed to register SMS listener.", e);
+          requestVerificationCode(e164number, true, false);
+        });
+      } else {
+        requestVerificationCode(e164number, false, false);
+      }
+
+      if(autoRegister){ // might have to invoke autoRegister if the users entered the number themselves.
+        phoneNumber = e164number;
+        autoRegister();
+      }
+
     }
+
   }
 
   @SuppressLint("StaticFieldLeak")
@@ -585,6 +645,7 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
         if (result.exception.isPresent() && result.exception.get() instanceof CaptchaRequiredException) {
           requestCaptcha(true);
         } else if (result.exception.isPresent()) {
+          Log.d("connection exception", result.exception.toString());
           Toast.makeText(RegistrationActivity.this, R.string.RegistrationActivity_unable_to_connect_to_service, Toast.LENGTH_LONG).show();
           createButton.setIndeterminateProgressMode(false);
           createButton.setProgress(0);
@@ -633,7 +694,7 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
   public void onCodeComplete(@NonNull String code) {
     this.registrationState = new RegistrationState(RegistrationState.State.CHECKING, this.registrationState);
     callMeCountDownView.setVisibility(View.INVISIBLE);
-    //keyboard.displayProgress();
+    keyboard.displayProgress();
 
 
     Log.d("---------the sms code? ", code);
