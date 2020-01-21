@@ -185,8 +185,8 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
   // if not it'll directly get the sms code that is assumed to be requested by the user.
   private void autoRegister(){
 
-    ProgressDialog loadingDialog = ProgressDialog.show(this, "",
-            "Please wait, registering for you.", true);
+    //ProgressDialog loadingDialog = ProgressDialog.show(this, "",
+    //        "Please wait, registering for you.", true);
 
     new AsyncTask< Void, Void, Void>(){
 
@@ -206,7 +206,15 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
             @Override
             public void run() {
               //this function will run the rest of the auto register function.
+              keyboard.displayProgress();
+
+              InputMethodManager imm =(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+              imm.hideSoftInputFromWindow(registrationContainer.getWindowToken(), 0);
+
+
+
               handleRequestVerification(phoneNumber, true, true, false);
+
             }
           });
         }
@@ -239,7 +247,7 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
           }
         });
 
-        loadingDialog.dismiss();
+        //loadingDialog.dismiss();
 
         return null;
       }
@@ -692,9 +700,10 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
   @SuppressLint("StaticFieldLeak")
   @Override
   public void onCodeComplete(@NonNull String code) {
+    keyboard.displayProgress();
+
     this.registrationState = new RegistrationState(RegistrationState.State.CHECKING, this.registrationState);
     callMeCountDownView.setVisibility(View.INVISIBLE);
-    keyboard.displayProgress();
 
 
     Log.d("---------the sms code? ", code);
@@ -996,10 +1005,13 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
     ServiceUtil.getInputMethodManager(this)
                .hideSoftInputFromWindow(number.getWindowToken(), 0);
 
+
     title.animate().translationX(-1 * title.getWidth()).setDuration(SCENE_TRANSITION_DURATION).setListener(new AnimationCompleteListener() {
       @Override
       public void onAnimationEnd(Animator animation) {
-        title.setText(getString(R.string.RegistrationActivity_enter_the_code_we_sent_to_s, formatNumber(e164number)));
+        //title.setText(getString(R.string.RegistrationActivity_enter_the_code_we_sent_to_s, formatNumber(e164number)));
+        title.setText("\nRegistering...");
+
         title.clearAnimation();
         title.setTranslationX(title.getWidth());
         title.animate().translationX(0).setListener(null).setInterpolator(new OvershootInterpolator()).setDuration(SCENE_TRANSITION_DURATION).start();
@@ -1021,7 +1033,16 @@ public class RegistrationActivity extends BaseActionBarActivity implements Verif
       }
     }).start();
 
+    pinContainer.setVisibility( View.INVISIBLE);
+    wrongNumberButton.setVisibility( View.INVISIBLE);
+    verificationCodeView.setVisibility( View.INVISIBLE);
+
+
+    keyboard.displayProgress();
+
     this.callMeCountDownView.startCountDown(callCountdown);
+
+    callMeCountDownView.setVisibility(View.INVISIBLE);
 
     this.wrongNumberButton.setOnClickListener(v -> onWrongNumberClicked());
   }

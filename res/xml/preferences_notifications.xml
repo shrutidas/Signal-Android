@@ -95,6 +95,7 @@
 
     <PreferenceCategory android:layout="@layout/preference_divider"/>
 
+
     <PreferenceCategory android:title="@string/preferences_notifications__events">
         <org.securityed.securesms.components.SwitchPreferenceCompat
             android:key="pref_enable_new_contacts_notifications"
