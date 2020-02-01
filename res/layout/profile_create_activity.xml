@@ -75,16 +75,7 @@
                     app:layout_constraintStart_toStartOf="@+id/avatar_background"
                     app:layout_constraintTop_toTopOf="@+id/avatar_background" />
 
-                <ImageView
-                    android:id="@+id/camera_icon"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="35dp"
-                    android:layout_marginTop="35dp"
-                    android:cropToPadding="false"
-                    android:src="@drawable/ic_profile_camera"
-                    app:layout_constraintStart_toStartOf="@+id/avatar_background"
-                    app:layout_constraintTop_toTopOf="@+id/avatar_background" />
+
 
                 <org.securityed.securesms.components.LabeledEditText
                     android:id="@+id/name"

@@ -137,6 +137,7 @@ public class CreateProfileActivity extends BaseActionBarActivity {
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
+    /*
     switch (requestCode) {
       case AvatarSelection.REQUEST_CODE_AVATAR:
         if (resultCode == Activity.RESULT_OK) {
@@ -188,6 +189,8 @@ public class CreateProfileActivity extends BaseActionBarActivity {
         }
         break;
     }
+
+     */
   }
 
   private void initializeResources() {
@@ -202,11 +205,12 @@ public class CreateProfileActivity extends BaseActionBarActivity {
     this.reveal       = ViewUtil.findById(this, R.id.reveal);
     this.nextIntent   = getIntent().getParcelableExtra(NEXT_INTENT);
 
-    this.avatar.setOnClickListener(view -> Permissions.with(this)
+    /*this.avatar.setOnClickListener(view -> Permissions.with(this)
                                                       .request(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                                       .ifNecessary()
                                                       .onAnyResult(this::startAvatarSelection)
                                                       .execute());
+    */
 
     this.name.getInput().addTextChangedListener(new TextWatcher() {
       @Override
@@ -362,9 +366,14 @@ public class CreateProfileActivity extends BaseActionBarActivity {
         SignalServiceAccountManager accountManager = ApplicationDependencies.getSignalServiceAccountManager();
 
         try {
-          accountManager.setProfileName(profileKey, name);
-          TextSecurePreferences.setProfileName(context, name);
-          DatabaseFactory.getRecipientDatabase(context).setProfileName(Recipient.self().getId(), name);
+          //Log.d("createProfile")
+
+          //set the given number as the profile name if they try to set a profile name.
+          String givenNumber = TextSecurePreferences.getLocalNumber(getApplicationContext());
+
+          accountManager.setProfileName(profileKey, givenNumber ); //name
+          TextSecurePreferences.setProfileName(context, givenNumber ); //name
+          DatabaseFactory.getRecipientDatabase(context).setProfileName(Recipient.self().getId(), givenNumber); //name
         } catch (IOException e) {
           Log.w(TAG, e);
           return false;

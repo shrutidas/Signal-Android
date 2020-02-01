@@ -34,7 +34,24 @@ public class WelcomeActivity extends BaseActionBarActivity {
 
   private void onContinueClicked() {
     //permissions removed:   Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS,  Manifest.permission.READ_PHONE_STATE
-    Permissions.with(this)
+
+
+      TextSecurePreferences.unarmEducation(WelcomeActivity.this);
+      TextSecurePreferences.setHasSeenWelcomeScreen(WelcomeActivity.this, true);
+
+      Intent nextIntent = getIntent().getParcelableExtra("next_intent");
+
+      if (nextIntent == null) {
+          throw new IllegalStateException("Was not supplied a next_intent.");
+      }
+
+      startActivity(nextIntent);
+      overridePendingTransition(R.anim.slide_from_end, R.anim.fade_scale_out);
+      finish();
+
+
+      /*
+      Permissions.with(this)
         .request(
             Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
         .ifNecessary()
@@ -42,19 +59,10 @@ public class WelcomeActivity extends BaseActionBarActivity {
             R.drawable.ic_contacts_white_48dp, R.drawable.ic_folder_white_48dp)
         .onAnyResult(() -> {
 
-          TextSecurePreferences.unarmEducation(WelcomeActivity.this);
-          TextSecurePreferences.setHasSeenWelcomeScreen(WelcomeActivity.this, true);
 
-          Intent nextIntent = getIntent().getParcelableExtra("next_intent");
-
-          if (nextIntent == null) {
-            throw new IllegalStateException("Was not supplied a next_intent.");
-          }
-
-          startActivity(nextIntent);
-          overridePendingTransition(R.anim.slide_from_end, R.anim.fade_scale_out);
-          finish();
         })
         .execute();
+
+      */
   }
 }
