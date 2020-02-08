@@ -189,14 +189,16 @@ public final class ContactSelectionListFragment extends    Fragment
 
     concatenateAdapter.addAdapter(cursorRecyclerViewAdapter);
     if (inviteCallback != null) {
-      footerAdapter = new FixedViewsAdapter(createInviteActionView(inviteCallback));
-      footerAdapter.hide();
-      concatenateAdapter.addAdapter(footerAdapter);
+      // AN ATTEMPT ***
+      //footerAdapter = new FixedViewsAdapter(createInviteActionView(inviteCallback));
+      //footerAdapter.hide();
+      //concatenateAdapter.addAdapter(footerAdapter);
     }
 
     recyclerView.setAdapter(concatenateAdapter);
     recyclerView.addItemDecoration(new StickyHeaderDecoration(concatenateAdapter, true, true));
   }
+
 
   private View createInviteActionView(@NonNull InviteCallback inviteCallback) {
     View view = LayoutInflater.from(requireContext())
