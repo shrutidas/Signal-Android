@@ -334,9 +334,13 @@ public final class ContactSelectionListFragment extends    Fragment
     @Override
     public void onItemClick(ContactSelectionListItem contact) {
       if (!isMulti() || !selectedContacts.contains(contact.getNumber())) {
+
+        Log.d("inside onItemClick", contact.getNumber());
+
         selectedContacts.add(contact.getNumber());
         contact.setChecked(true);
         if (onContactSelectedListener != null) onContactSelectedListener.onContactSelected(contact.getNumber());
+
       } else {
         selectedContacts.remove(contact.getNumber());
         contact.setChecked(false);
